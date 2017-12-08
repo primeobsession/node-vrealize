@@ -4,7 +4,8 @@ var requestPromise = Promise.promisifyAll(require('request'))
 
 module.exports = {
   importOne: importOne,
-  exportOne: exportOne
+  exportOne: exportOne,
+  list: list
 }
 
 function exportOne (categoryId, workflowPath, password) {
@@ -52,6 +53,35 @@ function importOne (workflowId, password) {
       method: 'GET',
       agent: _this.config.agent,
       url: `https://${_this.config.hostname}/vco/api/workflows/${workflowId}`,
+      headers: {
+        'cache-control': 'no-cache',
+        'authorization': 'Basic ' + new Buffer(_this.config.username + ':' + password).toString('base64'),
+        'accept': 'application/zip'
+      },
+      encoding: null
+    }
+
+    requestPromise.getAsync(options)
+      .then(function (response) {
+        return resolve(response)
+      })
+      .catch(function (error) {
+        reject(error)
+      })
+  })
+}
+
+
+function list (password) {
+  var _this = this
+
+  return new Promise(function (resolve, reject) {
+    var options
+
+    options = {
+      method: 'GET',
+      agent: _this.config.agent,
+      url: `https://${_this.config.hostname}/vco/api/workflows`,
       headers: {
         'cache-control': 'no-cache',
         'authorization': 'Basic ' + new Buffer(_this.config.username + ':' + password).toString('base64'),
